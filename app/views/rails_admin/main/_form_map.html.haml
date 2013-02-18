@@ -1,8 +1,24 @@
-= javascript_include_tag ("http://maps.googleapis.com/maps/api/js?key=#{field.google_api_key}&sensor=false")
+:javascript
+  jQuery(function(){
+    if (typeof google === "undefined") {
+      var script = document.createElement( 'script' );
+      script.type = 'text/javascript';
+      script.src = "http://maps.googleapis.com/maps/api/js?key=#{field.google_api_key}&sensor=false&callback=mapFieldInitialize";
+      script.id = 'rails-admin-map-script'
+      $("head").append( script );
+    }
+  });
+
+:javascript
+  jQuery(function(){
+    if (typeof google !== "undefined") {
+      mapFieldInitialize();
+    }
+  });
 
 = javascript_tag do
   :plain
-    jQuery(function(){
+    function mapFieldInitialize(){
       var marker = null;
       var latlng = new google.maps.LatLng(#{form.object.send(field.name) || field.default_latitude}, #{form.object.send(field.longitude_field) || field.default_longitude});
 
@@ -41,7 +57,8 @@
         jQuery("##{field.longitude_dom_name}").val(location.lng());
       }
 
-    });
+    };
+
 %div.ramf-map-container{:id => field.dom_name, :style => "width:#{field.map_width}px; height:#{field.map_height}px"}
 = form.send :hidden_field, field.name, :id => field.latitude_dom_name
 = form.send :hidden_field, field.longitude_field, :id => field.longitude_dom_name
